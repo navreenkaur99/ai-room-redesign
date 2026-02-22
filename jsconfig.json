@@ -1,3 +1,13 @@
+// {
+//   "compilerOptions": {
+//     "baseUrl": ".",
+//     "paths": {
+//       "@/*": ["./*"]
+//     }
+//   }
+// }
+
+
 {
   "compilerOptions": {
     "target": "ES2017",
