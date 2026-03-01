@@ -28,3 +28,4 @@ export const UsersTable= pgTable("users", {
   imageUrl: varchar( 'image_url' ).notNull(),
   credits: integer().notNull().default(3),
 });
+    

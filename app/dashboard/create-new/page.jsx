@@ -3,6 +3,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useContext } from "react";
+import { UserDetailContext } from "../../_context/UserDetailContext"; // ✅ adjust path if needed
 
 import ImageSelection from "./_components/ImageSelection";
 import RoomType from "./_components/RoomType";
@@ -23,6 +25,7 @@ const STORAGE_KEY = email ? `room_history_${email}` : "room_history_guest";
   const [orgImage, setOrgImage] = useState(null); // Original (before preview)
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
 
   const [openOutputDialog, setOpenOutputDialog] = useState(false);
 
@@ -63,7 +66,10 @@ const STORAGE_KEY = email ? `room_history_${email}` : "room_history_guest";
   };
   const GenerateAIImage = async () => {
   try {
+    
     if (!formData.image) return alert("Please select an image");
+    const creditsLeft = Number(userDetail?.credits || 0);
+if (creditsLeft <= 0) return alert("No credits left. Please buy credits.");
 
     setLoading(true);
     setGeneratedImage(null);
@@ -96,6 +102,17 @@ const STORAGE_KEY = email ? `room_history_${email}` : "room_history_guest";
 const prev = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 localStorage.setItem(STORAGE_KEY, JSON.stringify([newItem, ...prev]));
     // ✅ ✅ END BLOCK
+    // ✅ Deduct 1 credit in DB
+await axios.post("/api/add-credits", {
+  email,
+  credits: -1,
+});
+
+// ✅ Update context instantly
+setUserDetail((prev) => ({
+  ...prev,
+  credits: Number(prev?.credits || 0) - 1,
+}));
 
     setGeneratedImage(dataUrl);
     setOpenOutputDialog(true);
